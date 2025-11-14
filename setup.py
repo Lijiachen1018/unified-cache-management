@@ -135,7 +135,7 @@ ext_modules.append(CMakeExtension(name="ucm", sourcedir=ROOT_DIR))
 
 setup(
     name="uc-manager",
-    version="0.1.0rc4",
+    version="0.1.0rc1",
     description="Unified Cache Management",
     author="Unified Cache Team",
     packages=find_packages(),
@@ -144,4 +144,5 @@ setup(
     cmdclass={"build_ext": CMakeBuild},
     package_data=_get_package_data_with_so(),
     zip_safe=False,
+    options={'bdist_wheel': {'plat_name': 'manylinux1_x86_64'}},
 )
