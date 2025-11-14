@@ -112,9 +112,6 @@ jobs:
       name: testpypi
       url: https://test.pypi.org/p/ucm-test-release
     
-    permissions:
-      id_token: write # to access the PyPI API
-    
     steps:
       - name: Download Release Asset
         uses: actions/download-artifact@v4.2.2
