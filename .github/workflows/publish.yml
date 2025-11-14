@@ -107,7 +107,7 @@ jobs:
   pypi_publish:
     name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: release, wheel
+    needs: [release, wheel]
     environment: 
       name: testpypi
       url: https://test.pypi.org/p/ucm-test-release
