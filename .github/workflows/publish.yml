@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          os: ['ubuntu-20.04']
+          os: ['ubuntu-latest']
           python-version: ['3.12']
           pytorch-version: ['2.7.0']  # Must be the most recent version that meets requirements/cuda.txt.
           cuda-version: ['12.8.1']
