@@ -44,7 +44,7 @@ jobs:
     name: Build Wheel
     runs-on: self-hosted
     container:
-      image: quay.io/pypa/manylinux2014_x86_64:latest
+      image: vllm/vllm-openai:v0.9.2
     needs: release
 
     strategy:
