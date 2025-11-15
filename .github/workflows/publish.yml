@@ -1,7 +1,7 @@
 # This workflow will upload a Python Package to Release asset
 # For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Create Release
+name: Release
 
 on:
   push:
@@ -16,10 +16,8 @@ permissions:
 jobs:
   release:
     # Retrieve tag and create release
-    name: Create Release
+    name: Create Release to github
     runs-on: self-hosted
-    container:
-      image: pytorch/manylinux-builder:cuda12.8
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -46,7 +44,7 @@ jobs:
     name: Build Wheel
     runs-on: self-hosted
     container:
-      image: pytorch/manylinux-builder:cuda12.8
+      image: quay.io/pypa/manylinux2014_x86_64:latest
     needs: release
 
     strategy:
@@ -111,8 +109,6 @@ jobs:
   pypi_publish:
     name: Publish to PyPI
     runs-on: self-hosted
-    container:
-      image: pytorch/manylinux-builder:cuda12.8
     needs: [release, wheel]
     environment: 
       name: testpypi
