@@ -18,6 +18,8 @@ jobs:
     # Retrieve tag and create release
     name: Create Release
     runs-on: self-hosted
+    container:
+      image: pytorch/manylinux-builder:cuda12.8
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
@@ -43,6 +45,8 @@ jobs:
   wheel:
     name: Build Wheel
     runs-on: self-hosted
+    container:
+      image: pytorch/manylinux-builder:cuda12.8
     needs: release
 
     strategy:
@@ -107,6 +111,8 @@ jobs:
   pypi_publish:
     name: Publish to PyPI
     runs-on: self-hosted
+    container:
+      image: pytorch/manylinux-builder:cuda12.8
     needs: [release, wheel]
     environment: 
       name: testpypi
