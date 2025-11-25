@@ -57,6 +57,16 @@ jobs:
           vllm-version: ['0.9.2']
 
     steps:
+      - name: Setup proxy
+        run: |
+          export http_proxy="http://127.0.0.1:7890"
+          export no_proxy=localhost,127.0.0.1
+          git config --global http.sslVerify false
+          export https_proxy=$http_proxy
+          git config --global http.proxy $http_proxy
+          git config --global https.proxy $https_proxy
+          git config --global http.version HTTP/1.1
+
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
