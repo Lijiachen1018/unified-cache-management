@@ -45,6 +45,8 @@ jobs:
     runs-on: self-hosted
     container:
       image: vllm/vllm-openai:v0.9.2
+      ports:
+        - 7890:7890
     needs: release
 
     strategy:
