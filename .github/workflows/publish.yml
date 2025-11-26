@@ -45,7 +45,6 @@ jobs:
     runs-on: self-hosted
     container:
       image: vllm/vllm-openai:v0.9.2
-      options: --network=host
     needs: release
 
     strategy:
@@ -60,8 +59,7 @@ jobs:
     steps:
       - name: Setup proxy
         run: |
-          export http_proxy="http://127.0.0.1:7890"
-          export no_proxy=localhost,127.0.0.1
+          export http_proxy="http://172.80.0.1:7890"
           git config --global http.sslVerify false
           export https_proxy=$http_proxy
           git config --global http.proxy $http_proxy
