@@ -74,31 +74,19 @@ jobs:
         with:
           create-symlink: true
           key: ${{ github.job }}-${{ matrix.python-version }}-${{ matrix.cuda-version }}
-
-      # - name: Set up Linux Env
-      #   if: ${{ runner.os == 'Linux' }}
-      #   run: |
-      #     bash -x .github/workflows/scripts/env.sh
-      #     pip install vllm==${{ matrix.vllm-version }}
-
-      # - name: Set up Python
-      #   uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-      #   with:
-      #       python-version: ${{ matrix.python-version }}
-
-      # - name: Install CUDA ${{ matrix.cuda-version }}
-      #   run: |
-      #     bash -x .github/workflows/scripts/cuda-install.sh ${{ matrix.cuda-version }} ${{ matrix.os }}
-
-      # - name: Install PyTorch ${{ matrix.pytorch-version }} with CUDA ${{ matrix.cuda-version }}
-      #   run: |
-      #     bash -x .github/workflows/scripts/pytorch-install.sh ${{ matrix.python-version }} ${{ matrix.pytorch-version }} ${{ matrix.cuda-version }}
-          
+  
       - name: Build wheel
         shell: bash
         env:
           CMAKE_BUILD_TYPE: Release # do not compile with debug symbol to reduce wheel size
         run: |
+          export http_proxy="http://127.0.0.1:7890"
+          git config --global http.sslVerify false
+          export https_proxy=$http_proxy
+          git config --global http.proxy $http_proxy
+          git config --global https.proxy $https_proxy
+          git config --global http.version HTTP/1.1
+          
           export PLATFORM=cuda
           python3 setup.py bdist_wheel
           wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)
