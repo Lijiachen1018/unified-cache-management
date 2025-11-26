@@ -80,7 +80,7 @@ jobs:
         env:
           CMAKE_BUILD_TYPE: Release # do not compile with debug symbol to reduce wheel size
         run: |
-          export http_proxy="http://127.0.0.1:7890"
+          export http_proxy="http://172.80.0.1:7890"
           git config --global http.sslVerify false
           export https_proxy=$http_proxy
           git config --global http.proxy $http_proxy
