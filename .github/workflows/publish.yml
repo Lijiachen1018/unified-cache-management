@@ -113,7 +113,7 @@ jobs:
       #     generate_release_notes: true
       # - run: echo "Asset ${{ env.wheel_name }} was uploaded to ${{ steps.upload_release_asset.outputs.upload_url }}."
       - name: Publish package distributions to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.10.2
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/
