@@ -45,12 +45,11 @@ jobs:
       HTTP_PROXY: http://172.80.0.1:7890
       HTTPS_PROXY: http://172.80.0.1:7890
       PIP_INDEX_URL: https://pypi.org/simple
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
     name: Build Wheel
     runs-on: self-hosted
-    container:
-      image: vllm/vllm-openai:v0.9.2
     needs: release
-
     strategy:
       fail-fast: false
       matrix:
@@ -61,55 +60,39 @@ jobs:
           vllm-version: ['0.9.2']
 
     steps:
-      - name: Setup proxy
-        run: |
-          git config --global http.sslVerify false
-          git config --global http.proxy $HTTP_PROXY
-          git config --global https.proxy $HTTPS_PROXY
-          git config --global http.version HTTP/1.1
-
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@v4
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      # - name: Setup ccache
-      #   uses: hendrikmuhs/ccache-action@ed74d11c0b343532753ecead8a951bb09bb34bc9 # v1.2.14
-      #   with:
-      #     create-symlink: true
-      #     key: ${{ github.job }}-${{ matrix.python-version }}-${{ matrix.cuda-version }}
-  
-      - name: Build wheel
-        shell: bash
-        env:
-          CMAKE_BUILD_TYPE: Release # do not compile with debug symbol to reduce wheel size
+      - name: build wheel and upload to TestPyPI
         run: |
-          git config --global http.sslVerify false
-          git config --global http.proxy $HTTP_PROXY
-          git config --global https.proxy $HTTPS_PROXY
-          git config --global http.version HTTP/1.1
-          
-          export PLATFORM=cuda
-          python3 setup.py bdist_wheel
-          wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)
-          asset_name=${wheel_name//"linux"/"manylinux1"}
-          echo "wheel_name=${wheel_name}" >> "$GITHUB_ENV"
-          echo "asset_name=${asset_name}" >> "$GITHUB_ENV"
-      - name: Install publish dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install twine
-
-      - name: Publish package distributions to TestPyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        run: |
-          python3 -m twine upload --repository testpypi dist/*
+          docker run --rm \
+            --gpus all \
+            -v ${{ github.workspace }}:/workspace/unified-cache-management \
+            -w /workspace/unified-cache-management \
+            --entrypoint /bin/bash \
+            vllm/vllm-openai:v0.9.2 \
+            -c "
+              git config --global http.sslVerify false
+              git config --global http.proxy $HTTP_PROXY
+              git config --global https.proxy $HTTPS_PROXY
+              git config --global http.version HTTP/1.1
+              set -euo pipefail
+              export PLATFORM=cuda
+              pip config set global.index-url https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+              python3 setup.py bdist_wheel
+              wheel_name=$(find dist -name "*whl" -print0 | xargs -0 -n 1 basename)
+              asset_name=${wheel_name//"linux"/"manylinux1"}
+              echo "wheel_name=${wheel_name}" >> "$GITHUB_ENV"
+              echo "asset_name=${asset_name}" >> "$GITHUB_ENV"
+              python3 -m pip install --upgrade pip
+              python3 -m pip install twine
+              echo "[testpypi]" >> "~/.pypirc"
+              echo "username=__token__" >> "~/.pypirc"
+              echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
+              python3 -m twine upload --repository testpypi dist/* 
+            "
 
   build_and_push:
     runs-on: self-hosted
-    env:
-      HTTP_PROXY: http://172.80.0.1:7890
-      HTTPS_PROXY: http://172.80.0.1:7890
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -132,5 +115,5 @@ jobs:
         push: true
         tags: lijiachen19/test-ucm:${{ github.ref_name }}
         build-args: |
-          HTTP_PROXY=${{ env.HTTP_PROXY }}
-          HTTPS_PROXY=${{ env.HTTPS_PROXY }}
+          HTTP_PROXY=http://172.80.0.1:7890
+          HTTPS_PROXY=http://172.80.0.1:7890
