@@ -103,12 +103,10 @@ jobs:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
         run: |
-          python3 -m twine upload \
-            --repository-url https://test.pypi.org/legacy/ \
-            dist/*
+          python3 -m twine upload --repository testpypi dist/*
 
   build_and_push:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       HTTP_PROXY: http://172.80.0.1:7890
       HTTPS_PROXY: http://172.80.0.1:7890
