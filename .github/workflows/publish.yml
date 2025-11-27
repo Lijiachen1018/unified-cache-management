@@ -93,50 +93,43 @@ jobs:
           asset_name=${wheel_name//"linux"/"manylinux1"}
           echo "wheel_name=${wheel_name}" >> "$GITHUB_ENV"
           echo "asset_name=${asset_name}" >> "$GITHUB_ENV"
-      - name: Setup proxy
-        run: |
-          export http_proxy="http://127.0.0.1:7890"
-          git config --global http.sslVerify false
-          export https_proxy=$http_proxy
-          git config --global http.proxy $http_proxy
-          git config --global https.proxy $https_proxy
-          git config --global http.version HTTP/1.1
+      # - name: Setup proxy
+      #   run: |
+      #     export http_proxy="http://127.0.0.1:7890"
+      #     git config --global http.sslVerify false
+      #     export https_proxy=$http_proxy
+      #     git config --global http.proxy $http_proxy
+      #     git config --global https.proxy $https_proxy
+      #     git config --global http.version HTTP/1.1
 
-      - name: Upload Release Asset
-        id: upload_release_asset
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          prerelease: true
-          files: ./dist/${{ env.wheel_name }}
-          generate_release_notes: true
-      - run: echo "Asset ${{ env.wheel_name }} was uploaded to ${{ steps.upload_release_asset.outputs.upload_url }}."
-
-  pypi_publish:
-    name: Publish to PyPI
-    runs-on: self-hosted
-    needs: [release, wheel]
-    environment: 
-      name: testpypi
-      url: https://test.pypi.org/p/ucm-test-release
-    
-    steps:
-      - name: Setup proxy
-        run: |
-          export http_proxy="http://127.0.0.1:7890"
-          git config --global http.sslVerify false
-          export https_proxy=$http_proxy
-          git config --global http.proxy $http_proxy
-          git config --global https.proxy $https_proxy
-          git config --global http.version HTTP/1.1
-      - name: Download Release Asset
-        uses: actions/download-artifact@v4.2.2
-        with:
-          name: dist
-          path: dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.6.4
+      # - name: Upload Release Asset
+      #   id: upload_release_asset
+      #   uses: softprops/action-gh-release@v2
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     prerelease: true
+      #     files: ./dist/${{ env.wheel_name }}
+      #     generate_release_notes: true
+      # - run: echo "Asset ${{ env.wheel_name }} was uploaded to ${{ steps.upload_release_asset.outputs.upload_url }}."
+      - name: Publish package distributions to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
+  # pypi_publish:
+  #   name: Publish to PyPI
+  #   runs-on: self-hosted
+  #   needs: [release, wheel]
+  #   environment: 
+  #     name: testpypi
+  #     url: https://test.pypi.org/p/ucm-test-release
+  #   permissions:
+  #     id-token: write
+  #   steps:
+      
+  #     - name: Publish to PyPI
+  #       uses: pypa/gh-action-pypi-publish@v1.6.4
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
+  #         packages-dir: dist/
