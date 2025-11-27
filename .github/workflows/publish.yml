@@ -90,6 +90,9 @@ jobs:
               python3 -m twine upload --repository testpypi --skip-existing dist/${asset_name}
             "
   docker_push:
+    env:
+      HTTP_PROXY: http://172.80.0.1:7890
+      HTTPS_PROXY: http://172.80.0.1:7890
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
