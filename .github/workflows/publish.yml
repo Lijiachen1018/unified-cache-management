@@ -93,6 +93,14 @@ jobs:
           asset_name=${wheel_name//"linux"/"manylinux1"}
           echo "wheel_name=${wheel_name}" >> "$GITHUB_ENV"
           echo "asset_name=${asset_name}" >> "$GITHUB_ENV"
+      - name: Setup proxy
+        run: |
+          export http_proxy="http://172.80.0.1:7890"
+          git config --global http.sslVerify false
+          export https_proxy=$http_proxy
+          git config --global http.proxy $http_proxy
+          git config --global https.proxy $https_proxy
+          git config --global http.version HTTP/1.1
 
       - name: Upload Release Asset
         uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
@@ -113,6 +121,14 @@ jobs:
       url: https://test.pypi.org/p/ucm-test-release
     
     steps:
+      - name: Setup proxy
+        run: |
+          export http_proxy="http://172.80.0.1:7890"
+          git config --global http.sslVerify false
+          export https_proxy=$http_proxy
+          git config --global http.proxy $http_proxy
+          git config --global https.proxy $https_proxy
+          git config --global http.version HTTP/1.1
       - name: Download Release Asset
         uses: actions/download-artifact@v4.2.2
         with:
