@@ -77,16 +77,12 @@ jobs:
               export PLATFORM=cuda
               pip config set global.index-url ${{ env.PIP_INDEX_URL }}
               python3 setup.py bdist_wheel
-              cd dist/
-              ls -la dist/
-              wheel_name=$(ls -la *.whl 2>/dev/null | head -n 1)
-              asset_name=${wheel_name//"linux"/"manylinux1"}
-              echo "wheel_name=$wheel_name"
-              echo "asset_name=$asset_name"
-              if [ "$wheel_name" != "$asset_name" ]; then
-                mv "$wheel_name" "$asset_name"
-              fi
-              cd ..
+              ls -la ./
+              wheel_path=$(find ./ -name "*.whl" -type f)
+              echo "wheel_path=$wheel_path"
+              asset_name=${wheel_path//"linux"/"manylinux1"}
+              echo "asset_name=${asset_name}"
+              mv "$wheel_path" "$asset_name"
               python3 -m pip install --upgrade pip
               python3 -m pip install twine
               echo "[testpypi]" >> "~/.pypirc"
