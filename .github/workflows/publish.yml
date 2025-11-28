@@ -42,7 +42,9 @@ jobs:
 
   wheel:
     env:
-      PIP_INDEX_URL: https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+      HTTP_PROXY: ${{ secrets.HTTP_PROXY }}
+      HTTPS_PROXY: ${{ secrets.HTTPS_PROXY }}
+      PIP_INDEX_URL: https://pypi.org/simple
       TWINE_USERNAME: __token__
       TWINE_PASSWORD: ${{ secrets.TEST_PYPI_API_TOKEN }}
     name: Build Wheel
@@ -69,6 +71,8 @@ jobs:
             --entrypoint /bin/bash \
             vllm/vllm-openai:v0.9.2 \
             -c "
+              export http_proxy=${{ env.HTTP_PROXY }}
+              export https_proxy=${{ env.HTTPS_PROXY }}
               git config --global http.sslVerify false
               git config --global http.proxy ${{ secrets.HTTP_PROXY }}
               git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
