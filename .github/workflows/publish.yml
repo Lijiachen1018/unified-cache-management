@@ -72,16 +72,17 @@ jobs:
               git config --global http.proxy ${{ secrets.HTTP_PROXY }}
               git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
               git config --global http.version HTTP/1.1
+              sed -i 's/version=".*"/version="${{ github.ref_name }}"/g' setup.py
               set -euo pipefail
               export PLATFORM=cuda
               python3 setup.py bdist_wheel
               echo "upgrade pip"
-              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-              pip install twine --proxy ${{ secrets.HTTP_PROXY }} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-              echo "[testpypi]" >> "~/.pypirc"
+              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} -i ${{ secrets.PIP_INDEX_URL }}
+              pip install twine --proxy ${{ secrets.HTTP_PROXY }} -i ${{ secrets.PIP_INDEX_URL }}
+              echo "[${{ secrets.PYPI_REPO_NAME }}]" >> "~/.pypirc"
               echo "username=__token__" >> "~/.pypirc"
-              echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
-              HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository testpypi --skip-existing dist/*
+              echo "password=${{ secrets.PYPI_API_TOKEN }}" >> "~/.pypirc"
+              HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository ${{ secrets.PYPI_REPO_NAME }} --skip-existing dist/*
             "
       - name: find whl
         id: find_whl
@@ -90,7 +91,7 @@ jobs:
           echo "whl_path=${path}" >> $GITHUB_OUTPUT
       - name: Download whl
         run: |
-           curl -L -O https://test.pypi.org/simple/uc-manager/${{ steps.find_whl.outputs.whl_path }}
+           curl -L -O https://${{ secrets.PYPI_REPO_URL }}/simple/uc-manager/${{ steps.find_whl.outputs.whl_path }}
       - name: Upload .whl to GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -114,7 +115,7 @@ jobs:
           git config --global http.proxy ${{ secrets.HTTP_PROXY }}
           git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
           git config --global http.version HTTP/1.1
-          docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t lijiachen19/test-ucm:${{ github.ref_name }}  -f docker/Dockerfile .
-          docker tag lijiachen19/test-ucm:${{ github.ref_name }} lijiachen19/test-ucm:latest
-          docker push lijiachen19/test-ucm:${{ github.ref_name }}
-          docker push lijiachen19/test-ucm:latest
+          docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }}  -f docker/Dockerfile .
+          docker tag ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }} ${{ secrets.DOCKER_HUB_REPO}}:latest
+          docker push ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }}
+          docker push ${{ secrets.DOCKER_HUB_REPO}}:latest
