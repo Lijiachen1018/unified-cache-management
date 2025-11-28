@@ -43,30 +43,18 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grant write permission to the GITHUB_TOKEN for creating releases
+      contents: write # Required to create a release
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }} # Use the pushed tag name as the release tag
-          release_name: Release ${{ github.ref }} # Customize the release name
-          body: |
-            # Release Notes
-
-            This release corresponds to tag ${{ github.ref }}.
-
-            ## Changes:
-            - Add your release notes here.
-            - You can also use automatically generated release notes by setting `generate_release_notes: true`.
-          draft: true # Set to true to create a draft release
-          prerelease: true # Set to true for pre-releases
-          generate_release_notes: true # Optional: Automatically generate release notes
+        run: |
+          TAG_NAME=${{ github.ref }}
+          echo "TAG_NAME: $TAG_NAME"
+          gh release create "$TAG_NAME" --generate-notes --draft --prerelease --title "$TAG_NAME" --notes "Release $TAG_NAME" --target ${{ github.ref }}
  
   # wheel:
   #   env:
