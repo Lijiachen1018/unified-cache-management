@@ -77,13 +77,9 @@ jobs:
               export PLATFORM=cuda
               pip config set global.index-url ${{ env.PIP_INDEX_URL }}
               python3 setup.py bdist_wheel
-              cd dist
-              wheel_name=$(ls *.whl 2>/dev/null | head -n 1)
-              if [ -z "$wheel_name" ]; then
-                echo "Error: No wheel file found in dist/"
-                ls -la || true
-                exit 1
-              fi
+              cd dist/
+              ls -la dist/
+              wheel_name=$(ls -la *.whl 2>/dev/null | head -n 1)
               asset_name=${wheel_name//"linux"/"manylinux1"}
               echo "wheel_name=$wheel_name"
               echo "asset_name=$asset_name"
