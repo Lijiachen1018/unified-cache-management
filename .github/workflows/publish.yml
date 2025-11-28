@@ -63,6 +63,8 @@ jobs:
       - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
       - name: build wheel and upload to TestPyPI
         run: |
+          echo "github.workspace: ${{ github.workspace }}"
+          ls -la ${{ github.workspace }}
           docker run --rm \
             --gpus all \
             -v ${{ github.workspace }}:/workspace/unified-cache-management \
@@ -85,11 +87,15 @@ jobs:
               echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
               HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository testpypi --skip-existing dist/*
             "
+      - name: find whl
+        run: |
+          path=$(find ${{ github.workspace }} -name "*.whl" -type f)
+          echo "whl_path: $path"
       - name: Upload .whl to GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/*.whl # Path to your .whl file(s)
+          file: ${{ github.workspace }}/dist/*.whl # Path to your .whl file
           tag: ${{ github.ref_name }} # Use the release tag as the target
           overwrite: true # Overwrite if the asset already exists
   
