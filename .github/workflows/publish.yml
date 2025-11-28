@@ -86,6 +86,7 @@ jobs:
               echo "username=__token__" >> "~/.pypirc"
               echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
               HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository testpypi --skip-existing dist/*
+              chmod -R 777 ${{ github.workspace }}/dist/
             "
       - name: find whl
         run: |
@@ -95,7 +96,7 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ github.workspace }}/dist/*.whl # Path to your .whl file
+          file: ${{ github.workspace }}/dist/*.whl # Path to your .whl file(s)
           tag: ${{ github.ref_name }} # Use the release tag as the target
           overwrite: true # Overwrite if the asset already exists
   
