@@ -77,8 +77,9 @@ jobs:
               set -euo pipefail
               export PLATFORM=cuda
               python3 setup.py bdist_wheel
-              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} 
-              pip install twine --proxy ${{ secrets.HTTP_PROXY }} --proxy ${{ secrets.HTTPS_PROXY }}
+              echo "upgrade pip"
+              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+              pip install twine --proxy ${{ secrets.HTTP_PROXY }} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
               echo "[testpypi]" >> "~/.pypirc"
               echo "username=__token__" >> "~/.pypirc"
               echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
