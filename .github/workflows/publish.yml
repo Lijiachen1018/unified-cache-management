@@ -53,6 +53,7 @@ jobs:
         with:
           token: ${{ github.token }}
           tag: ${{ github.ref_name }}
+          includeInvalidCommits: true
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
