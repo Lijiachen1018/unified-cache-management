@@ -77,12 +77,12 @@ jobs:
               set -euo pipefail
               export PLATFORM=cuda
               python3 setup.py bdist_wheel
-              python3 -m pip install --upgrade pip
-              python3 -m pip install twine
+              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} 
+              pip install twine --proxy ${{ secrets.HTTP_PROXY }} --proxy ${{ secrets.HTTPS_PROXY }}
               echo "[testpypi]" >> "~/.pypirc"
               echo "username=__token__" >> "~/.pypirc"
               echo "password=${{ secrets.TEST_PYPI_API_TOKEN }}" >> "~/.pypirc"
-              python3 -m twine upload --repository testpypi --skip-existing dist/${asset_name}
+              HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository testpypi --skip-existing dist/*
             "
       - name: Upload .whl to GitHub Release
         uses: svenstaro/upload-release-action@v2
