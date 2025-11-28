@@ -78,9 +78,23 @@ jobs:
               pip config set global.index-url ${{ env.PIP_INDEX_URL }}
               python3 setup.py bdist_wheel
               wheel_path=$(find dist -name "*whl" -type f | head -n 1)
+              if [ -z "$wheel_path" ]; then
+                echo "Error: No wheel file found in dist/"
+                ls -la dist/ || true
+                exit 1
+              fi
               wheel_name=$(basename "$wheel_path")
               asset_name=${wheel_name//"linux"/"manylinux1"}
-              mv "$wheel_path" "dist/${asset_name}"
+              echo "wheel_path=$wheel_path"
+              echo "asset_name=$asset_name"
+              echo "wheel_name=$wheel_name"
+              if [ -z "$asset_name" ]; then
+                echo "Error: asset_name is empty. wheel_name=$wheel_name"
+                exit 1
+              fi
+              if [ "$wheel_name" != "$asset_name" ]; then
+                mv "$wheel_path" "dist/${asset_name}"
+              fi
               python3 -m pip install --upgrade pip
               python3 -m pip install twine
               echo "[testpypi]" >> "~/.pypirc"
@@ -96,21 +110,21 @@ jobs:
           tag: ${{ github.ref_name }} # Use the release tag as the target
           overwrite: true # Overwrite if the asset already exists
   
-  docker_push:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: |
-          git config --global http.sslVerify false
-          git config --global http.proxy ${{ secrets.HTTP_PROXY }}
-          git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
-          git config --global http.version HTTP/1.1
-          docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t lijiachen19/test-ucm:${{ github.ref_name }}  -f docker/Dockerfile .
-          docker tag lijiachen19/test-ucm:${{ github.ref_name }} lijiachen19/test-ucm:latest
-          docker push lijiachen19/test-ucm:${{ github.ref_name }}
-          docker push lijiachen19/test-ucm:latest
+  # docker_push:
+  #   runs-on: self-hosted
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ secrets.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - run: |
+  #         git config --global http.sslVerify false
+  #         git config --global http.proxy ${{ secrets.HTTP_PROXY }}
+  #         git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
+  #         git config --global http.version HTTP/1.1
+  #         docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t lijiachen19/test-ucm:${{ github.ref_name }}  -f docker/Dockerfile .
+  #         docker tag lijiachen19/test-ucm:${{ github.ref_name }} lijiachen19/test-ucm:latest
+  #         docker push lijiachen19/test-ucm:${{ github.ref_name }}
+  #         docker push lijiachen19/test-ucm:latest
