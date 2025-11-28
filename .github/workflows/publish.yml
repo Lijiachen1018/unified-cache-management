@@ -78,23 +78,13 @@ jobs:
               pip config set global.index-url ${{ env.PIP_INDEX_URL }}
               python3 setup.py bdist_wheel
               wheel_path=$(find dist -name "*whl" -type f | head -n 1)
-              if [ -z "$wheel_path" ]; then
-                echo "Error: No wheel file found in dist/"
-                ls -la dist/ || true
-                exit 1
-              fi
               wheel_name=$(basename "$wheel_path")
               asset_name=${wheel_name//"linux"/"manylinux1"}
               echo "wheel_path=$wheel_path"
-              echo "asset_name=$asset_name"
               echo "wheel_name=$wheel_name"
-              if [ -z "$asset_name" ]; then
-                echo "Error: asset_name is empty. wheel_name=$wheel_name"
-                exit 1
-              fi
-              if [ "$wheel_name" != "$asset_name" ]; then
-                mv "$wheel_path" "dist/${asset_name}"
-              fi
+              echo "asset_name=$asset_name"
+              ls -la dist/
+              mv "$wheel_path" "dist/${asset_name}"
               python3 -m pip install --upgrade pip
               python3 -m pip install twine
               echo "[testpypi]" >> "~/.pypirc"
