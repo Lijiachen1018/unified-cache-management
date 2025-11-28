@@ -72,7 +72,7 @@ jobs:
               git config --global http.proxy ${{ secrets.HTTP_PROXY }}
               git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
               git config --global http.version HTTP/1.1
-              sed -i 's/version=".*"/version=\"${{ github.ref_name }}\"/g' setup.py
+              sed -i 's/version=\".*\"/version=\"${{ github.ref_name }}\"/g' setup.py
               set -euo pipefail
               export PLATFORM=cuda
               python3 setup.py bdist_wheel
