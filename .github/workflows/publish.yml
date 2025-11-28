@@ -78,6 +78,8 @@ jobs:
               pip config set global.index-url ${{ env.PIP_INDEX_URL }}
               python3 setup.py bdist_wheel
               ls -la ./
+              ls -la dist/
+              sudo chmod -R 777 dist/
               wheel_path=$(find ./ -name "*.whl" -type f)
               echo "wheel_path=$wheel_path"
               asset_name=${wheel_path//"linux"/"manylinux1"}
