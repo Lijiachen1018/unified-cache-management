@@ -76,13 +76,12 @@ jobs:
               set -euo pipefail
               export PLATFORM=cuda
               python3 setup.py bdist_wheel
-              echo "upgrade pip"
-              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} -i ${{ secrets.PIP_INDEX_URL }}
-              pip install twine --proxy ${{ secrets.HTTP_PROXY }} -i ${{ secrets.PIP_INDEX_URL }}
-              echo "[${{ secrets.PYPI_REPO_NAME }}]" >> "~/.pypirc"
+              pip install --upgrade pip --proxy ${{ secrets.HTTP_PROXY }} -i ${{ vars.PIP_INDEX_URL }}
+              pip install twine --proxy ${{ secrets.HTTP_PROXY }} -i ${{ vars.PIP_INDEX_URL }}
+              echo "[${{ vars.PYPI_REPO }}]" >> "~/.pypirc"
               echo "username=__token__" >> "~/.pypirc"
               echo "password=${{ secrets.PYPI_API_TOKEN }}" >> "~/.pypirc"
-              HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository ${{ secrets.PYPI_REPO_NAME }} --skip-existing dist/*
+              HTTP_PROXY=${{ secrets.HTTP_PROXY }} python3 -m twine upload --repository ${{ vars.PYPI_REPO }} --skip-existing dist/*
             "
       - name: find whl
         id: find_whl
@@ -91,7 +90,7 @@ jobs:
           echo "whl_path=${path}" >> $GITHUB_OUTPUT
       - name: Download whl
         run: |
-           curl -L -O https://${{ secrets.PYPI_REPO_URL }}/simple/uc-manager/${{ steps.find_whl.outputs.whl_path }}
+           curl -L -O https://${{ vars.PYPI_REPO_URL }}/simple/uc-manager/${{ steps.find_whl.outputs.whl_path }}
       - name: Upload .whl to GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -115,7 +114,7 @@ jobs:
           git config --global http.proxy ${{ secrets.HTTP_PROXY }}
           git config --global https.proxy ${{ secrets.HTTPS_PROXY }}
           git config --global http.version HTTP/1.1
-          docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }}  -f docker/Dockerfile .
-          docker tag ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }} ${{ secrets.DOCKER_HUB_REPO}}:latest
-          docker push ${{ secrets.DOCKER_HUB_REPO}}:${{ github.ref_name }}
-          docker push ${{ secrets.DOCKER_HUB_REPO}}:latest
+          docker build --network host --build-arg HTTP_PROXY=${{ secrets.HTTP_PROXY }}   --build-arg HTTPS_PROXY=${{ secrets.HTTPS_PROXY }} -t ${{ vars.DOCKER_HUB_REPO}}:${{ github.ref_name }}  -f docker/Dockerfile .
+          docker tag ${{ vars.DOCKER_HUB_REPO}}:${{ github.ref_name }} ${{ vars.DOCKER_HUB_REPO}}:latest
+          docker push ${{ vars.DOCKER_HUB_REPO}}:${{ github.ref_name }}
+          docker push ${{ vars.DOCKER_HUB_REPO}}:latest
