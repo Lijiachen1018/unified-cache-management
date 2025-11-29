@@ -89,14 +89,9 @@ jobs:
         run: |
           path=$(basename $(find ${{ github.workspace }} -name "*.whl" -type f)) 
           echo "whl_path=${path}" >> $GITHUB_OUTPUT
-  
-  release_whl:
-    runs-on: ubuntu-latest      
-    needs: wheel
-    steps:
-      - name: Download whl from PyPI
+      - name: Download whl
         run: |
-           curl -L -O https://${{ vars.PYPI_REPO_URL }}/simple/uc-manager/${{ needs.wheel.outputs.whl_path }}
+           curl -L -O https://${{ secrets.PYPI_REPO_URL }}/simple/uc-manager/${{ steps.find_whl.outputs.whl_path }}
       - name: Upload .whl to GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
