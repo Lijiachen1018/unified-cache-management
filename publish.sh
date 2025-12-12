@@ -1,9 +1,8 @@
 #!/bin/bash
 # This script replicates the GitHub Actions publish workflow
 # Usage: 
-# firstly create a personal access token for GitHub , dockerhub and PyPI
 #       
-# Secondly, set environment variables: TAG_NAME, GITHUB_TOKEN, PYPI_API_TOKEN, HTTP_PROXY, HTTPS_PROXY, etc.
+# set environment variables: TAG_NAME, GITHUB_TOKEN, PYPI_API_TOKEN, HTTP_PROXY, HTTPS_PROXY, etc.
 # export PYPI_API_TOKEN="your_pypi_token"
 # export PYPI_REPO="testpypi or pypi"
 # export HTTP_PROXY="http://proxy:port"
@@ -13,7 +12,7 @@
 # export DOCKER_HUB_REPO="your_dockerhub_repo_name, eg. unifiedcachemanagement/ucm"
 # export GITHUB_USERNAME="your_github_username"
 
-# Thirdly, login to GitHub, dockerhub with your credentials created in the first step
+# Login to dockerhub with your credentials
 #       docker login
 #
 # Finally create a release with the tag name
