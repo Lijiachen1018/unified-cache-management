@@ -24,23 +24,34 @@
 
 import logging
 import os
-
+from logging.handlers import RotatingFileHandler
+# Configuration
+LOG_FILE = "app.log"
+MAX_BYTES = 1048576
+BACKUP_COUNT = 5  # Keep up to 5 backup logs (app.log.1 to app.log.5)
 
 def init_logger(name: str = "UNIFIED_CACHE") -> logging.Logger:
     log_level = os.getenv("UNIFIED_CACHE_LOG_LEVEL", "INFO").upper()
 
     logger = logging.getLogger(name)
     logger.setLevel(log_level)
+    # Create the RotatingFileHandler
+    handler = RotatingFileHandler(
+        LOG_FILE,
+        mode='a',  # Append mode
+        maxBytes=MAX_BYTES,
+        backupCount=BACKUP_COUNT,
+        encoding=None,
+        delay=False
+    )
 
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter(
-            "[%(asctime)s] - %(name)s - %(levelname)s [%(filename)s:%(lineno)d] %(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
+    formatter = logging.Formatter(
+        "[%(asctime)s.%(msecs)06d][%(name)s][%(levelname).1s] %(message)s [%(process)d,%(thread)d][%(filename)s:%(lineno)d]",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
     return logger
 

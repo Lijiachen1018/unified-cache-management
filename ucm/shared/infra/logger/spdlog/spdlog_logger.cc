@@ -24,7 +24,7 @@
 #include <mutex>
 #include <spdlog/cfg/helpers.h>
 #include <spdlog/details/os.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
+#include "spdlog/sinks/rotating_file_sink.h"
 #include <spdlog/spdlog.h>
 #include "logger/logger.h"
 
@@ -57,7 +57,9 @@ private:
         const std::string name = "UC";
         const std::string envLevel = name + "_LOGGER_LEVEL";
         try {
-            this->logger_ = spdlog::stdout_color_mt(name);
+            auto max_size = 1048576 * 5;
+            auto max_files = 3;
+            this->logger_ = spdlog::rotating_logger_mt(name, "logs/rotating.txt", max_size, max_files);
             this->logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%f][%n][%^%L%$] %v [%P,%t][%s:%#,%!]");
             auto level = spdlog::details::os::getenv(envLevel.c_str());
             if (!level.empty()) { spdlog::cfg::helpers::load_levels(level); }

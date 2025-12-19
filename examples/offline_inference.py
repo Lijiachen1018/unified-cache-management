@@ -22,7 +22,7 @@ def build_llm_with_uc(module_path: str, name: str, model: str):
         kv_connector_module_path=module_path,
         kv_role="kv_both",
         kv_connector_extra_config={
-            "UCM_CONFIG_FILE": "/workspace/unified-cache-management/examples/ucm_config_example.yaml"
+            "UCM_CONFIG_FILE": "./ucm_config_example.yaml"
         },
     )
 
@@ -64,7 +64,7 @@ def print_output(
 def main():
     module_path = "ucm.integration.vllm.ucm_connector"
     name = "UCMConnector"
-    model = os.getenv("MODEL_PATH", "/home/models/DeepSeek-V2-Lite")
+    model = os.getenv("MODEL_PATH", "/home/models/Qwen2.5-14B-Instruct")
 
     tokenizer = AutoTokenizer.from_pretrained(model, use_chat_template=True)
 
