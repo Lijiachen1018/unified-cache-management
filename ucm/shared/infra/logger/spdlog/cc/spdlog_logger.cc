@@ -54,8 +54,8 @@ std::shared_ptr<spdlog::logger> SpdLogger::CreateLogger()
         std::cout << "Max size: " << this->max_size_ << std::endl;
         std::cout << "Max files: " << this->max_files_ << std::endl;
         this->logger_ = spdlog::compress_rotating_logger_mt(name, this->path_, this->max_size_, this->max_files_);
-        this->logger_->flush_on(spdlog::level::trace);
-        // spdlog::flush_every(std::chrono::seconds(3));
+        // this->logger_->flush_on(spdlog::level::trace);
+        spdlog::flush_every(std::chrono::seconds(3));
         this->logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%f][%n][%^%L%$] %v [%P,%t][%s:%#,%!]");
         auto level = spdlog::details::os::getenv(envLevel.c_str());
         if (!level.empty()) { spdlog::cfg::helpers::load_levels(level); }

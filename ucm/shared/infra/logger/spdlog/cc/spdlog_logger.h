@@ -24,7 +24,7 @@
 #ifndef UNIFIEDCACHE_INFRA_LOGGER_SPDLOG_SPDLOG_LOGGER_H
 #define UNIFIEDCACHE_INFRA_LOGGER_SPDLOG_SPDLOG_LOGGER_H
 #include <spdlog/spdlog.h>
-#include "logger/logger.h"
+#include "logger.h"
 namespace UC::Logger {
 
 

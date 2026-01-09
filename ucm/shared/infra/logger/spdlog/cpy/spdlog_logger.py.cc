@@ -38,7 +38,7 @@ std::string format(std::string fmt, py::args args) {
     return msg;
 }
 
-PYBIND11_MODULE(spdlog_logger, m) {
+PYBIND11_MODULE(ucmlogger, m) {
     m.def("format", &format);
     m.def("info", &Info);
     m.def("warning", &Warn);

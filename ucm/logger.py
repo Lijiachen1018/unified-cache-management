@@ -27,7 +27,7 @@ import inspect
 import yaml
 import atexit
 
-from ucm.shared.infra import spdlog_logger as logger
+from ucm.shared.infra import ucmlogger as logger
 # from ucm.shared.infra import source_location
 
 
