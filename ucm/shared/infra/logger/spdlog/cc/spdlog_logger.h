@@ -34,15 +34,24 @@ class SpdLogger : public ILogger {
     std::mutex mutex_;
 
 public:
-    SpdLogger() {
-        this->logger_ = this->CreateLogger();
-    }
+    SpdLogger() : logger_{nullptr} {}
     void Log(Level&& lv, SourceLocation&& loc, std::string&& msg) override;
-
+    void Setup(const std::string &path, int max_files, int max_size) override;
+    void Flush() override;
+    
 private:
-    std::shared_ptr<spdlog::logger> CreateLogger();   
+    std::shared_ptr<spdlog::logger> CreateLogger();
+    std::string path_{"log/ucm.log"};
+    int max_files_{3};
+    int max_size_{5 * 1048576}; // 5MB
 };
 
+void Info(std::string file, std::string func, int line, std::string msg);
+void Warn(std::string file, std::string func, int line, std::string msg);
+void Error(std::string file, std::string func, int line, std::string msg);
+void Debug(std::string file, std::string func, int line, std::string msg);
+void Setup(const std::string &path, int max_files, int max_size);
+void Flush();
 }
 
 #endif

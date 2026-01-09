@@ -24,14 +24,35 @@
 
 import os
 import inspect
+import yaml
+import atexit
 
-from ucm.shared.infra import spdlog_logger
-from ucm.shared.infra import source_location
+from ucm.shared.infra import spdlog_logger as logger
+# from ucm.shared.infra import source_location
 
 
 class Logger:
-    def __init__(self):
-        self.logger = spdlog_logger.Logger()
+
+    def __init__(self, name: str = "UC", config_file: str = None):
+        self.name = name
+        log_config = {}
+        if config_file:
+            config = self.load_config(config_file)
+            if config:
+                log_config = config.get("log_config", {})
+        print("="*20)
+        print(log_config)
+        
+        path = log_config.get("path", "log/ucm.log")
+        max_files = log_config.get("max_files", 3)
+        max_size = log_config.get("max_size", 5)
+        print(path, max_files, max_size)
+        logger.setup(path, max_files, max_size)
+
+    def load_config(self, path: str):
+        with open(path, "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f) or {}
+        return config
 
     def get_source_location(self):
         """Helper function to print the current file, function, and line number."""
@@ -40,22 +61,44 @@ class Logger:
         filename = os.path.basename(caller_frame.f_code.co_filename)
         lineno = caller_frame.f_lineno
         func_name = caller_frame.f_code.co_name
-        return source_location.SourceLocation(filename, func_name, lineno)
+        return filename, func_name, lineno
     
     def debug(self, message: str, *args):
-        self.logger.debug(message, self.get_source_location(), *args)
+        file, func, line = self.get_source_location()
+        msg = logger.format(message, args)
+        logger.debug(file, func, line, msg)
 
     def info(self, message: str, *args):
-        self.logger.info(message, self.get_source_location(), *args)
+        file, func, line = self.get_source_location()
+        msg = logger.format(message, args)
+        logger.info(file, func, line, msg)
 
     def warning(self, message: str, *args):
-        self.logger.warning(message, self.get_source_location(), *args)
+        file, func, line = self.get_source_location()
+        msg = logger.format(message, args)
+        logger.warning(file, func, line, msg)
 
     def error(self, message: str, *args):
-        self.logger.error(message, self.get_source_location(), *args)
+        file, func, line = self.get_source_location()
+        msg = logger.format(message, args)
+        logger.error(file, func, line, msg)
+    
+    def flush(self):
+        logger.flush()
 
-def init_logger(name: str = "UNIFIED_CACHE")->Logger:
-    return Logger()
+def init_logger(name: str = "UC", config_file: str = None)->Logger:
+    return Logger(name, config_file)
+
+def _flush_logger_on_exit():
+    """Flush the logger when the program exits."""
+    try:
+        print("Flushing logger on exit")
+        logger.flush()
+    except Exception:
+        pass  # Ignore errors during exit
+
+# Register flush function to be called at program exit
+atexit.register(_flush_logger_on_exit)
 
 def test_logger():
     logger = init_logger()
@@ -64,18 +107,8 @@ def test_logger():
     logger.warning("warning message")
     logger.error("error message")
     logger.info("info message with format: {} {}", "test", "test2")
-
-def test_logger_multi_thread():
-    import threading
-    for i in range(10):
-        logger = init_logger()
-        threading.Thread(target=logger.debug, args=("debug message", i))
-        threading.Thread(target=logger.info, args=("info message", i))
-        threading.Thread(target=logger.warning, args=("warning message", i))
-        threading.Thread(target=logger.error, args=("error message", i))
-        threading.Thread(target=logger.info, args=("[Thread %d]info message with format: %s %s ", i, "test", "test2"))
-    
+ 
 
 if __name__ == "__main__":
     os.environ["UNIFIED_CACHE_LOG_LEVEL"] = "DEBUG"
-    test_logger_multi_thread()
+    test_logger()

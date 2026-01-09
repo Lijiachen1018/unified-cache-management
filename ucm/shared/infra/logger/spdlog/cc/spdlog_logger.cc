@@ -26,7 +26,7 @@
 #include <spdlog/details/os.h>
 #include "compress_rotate_file_sink.h"
 #include <spdlog/spdlog.h>
-
+#include <spdlog/async.h>
 #include "spdlog_logger.h"
 #include <chrono>
 
@@ -38,21 +38,24 @@ static spdlog::level::level_enum SpdLevels[] = {spdlog::level::debug, spdlog::le
 void SpdLogger::Log(Level&& lv, SourceLocation&& loc, std::string&& msg)
 {
     auto level = SpdLevels[fmt::underlying(lv)];
+    this->logger_ = this->CreateLogger();
     this->logger_->log(spdlog::source_loc{loc.file, loc.line, loc.func}, level, std::move(msg));
 }
 
 std::shared_ptr<spdlog::logger> SpdLogger::CreateLogger()
 {
+    if (this->logger_) { return this->logger_; }
     std::lock_guard<std::mutex> lg(this->mutex_);
     if (this->logger_) { return this->logger_; }
     const std::string name = "UC";
     const std::string envLevel = name + "_LOGGER_LEVEL";
     try {
-        auto max_size = 1048576 * 5;
-        auto max_files = 3;
-        this->logger_ = spdlog::compress_rotating_logger_mt(name, "logs/ucm.log", max_size, max_files);
-        this->logger_->flush_on(spdlog::level::err);
-        spdlog::flush_every(std::chrono::seconds(3));
+        std::cout << "Creating logger: " << this->path_ << std::endl;
+        std::cout << "Max size: " << this->max_size_ << std::endl;
+        std::cout << "Max files: " << this->max_files_ << std::endl;
+        this->logger_ = spdlog::compress_rotating_logger_mt(name, this->path_, this->max_size_, this->max_files_);
+        this->logger_->flush_on(spdlog::level::trace);
+        // spdlog::flush_every(std::chrono::seconds(3));
         this->logger_->set_pattern("[%Y-%m-%d %H:%M:%S.%f][%n][%^%L%$] %v [%P,%t][%s:%#,%!]");
         auto level = spdlog::details::os::getenv(envLevel.c_str());
         if (!level.empty()) { spdlog::cfg::helpers::load_levels(level); }
@@ -62,11 +65,44 @@ std::shared_ptr<spdlog::logger> SpdLogger::CreateLogger()
     }
 }
 
+void SpdLogger::Setup(const std::string &path, int max_files, int max_size)
+{
+    this->path_ = path;
+    this->max_files_ = max_files;
+    this->max_size_ = max_size * 1048576;
+    this->logger_ = this->CreateLogger();
+}
 
-ILogger* Make()
+void SpdLogger::Flush()
+{
+    if (this->logger_) {
+        this->logger_->flush();
+    }
+}
+ILogger& Make()
 {
     static SpdLogger logger;
-    return &logger;
+    return logger;
+}
+
+void Info(std::string file, std::string func, int line, std::string msg) {
+    Make().Log(Level::INFO, SourceLocation{file.c_str(), func.c_str(), line}, std::move(msg));
+}
+void Warn(std::string file, std::string func, int line, std::string msg) {
+    Make().Log(Level::WARN, SourceLocation{file.c_str(), func.c_str(), line}, std::move(msg));
+}
+void Error(std::string file, std::string func, int line, std::string msg) {
+    Make().Log(Level::ERROR, SourceLocation{file.c_str(), func.c_str(), line}, std::move(msg));
+}
+void Debug(std::string file, std::string func, int line, std::string msg) {
+    Make().Log(Level::DEBUG, SourceLocation{file.c_str(), func.c_str(), line}, std::move(msg));
+}
+
+void Setup(const std::string &path, int max_files, int max_size) {
+    Make().Setup(path, max_files, max_size);
+}
+void Flush() {
+    Make().Flush();
 }
 
 } // namespace UC::Logger

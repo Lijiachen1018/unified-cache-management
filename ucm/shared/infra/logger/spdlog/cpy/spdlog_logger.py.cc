@@ -25,58 +25,27 @@
 #include "spdlog_logger.h"
 
 namespace py = pybind11;
+namespace UC::Logger {
 
-using Level = UC::Logger::Level;
-using SourceLocation = UC::Logger::SourceLocation;
 
-// Wrapper class to hold strings for SourceLocation
-struct SourceLocationWrapper {
-    std::string file_str;
-    std::string func_str;
-    int32_t line;
-    
-    SourceLocationWrapper(const std::string &file, const std::string &func, int line_val)
-        : file_str(file), func_str(func), line(line_val) {}
-    
-    SourceLocation toSourceLocation() const {
-        return SourceLocation{file_str.c_str(), func_str.c_str(), line};
-    }
-};
-class PyLogger {
-public:
-    PyLogger() {}
-    ~PyLogger() {}
-
-    void info(const std::string &fmt, const SourceLocationWrapper &loc_wrapper, py::args args) {
-        log(Level::INFO, fmt, loc_wrapper.toSourceLocation(), args);
-    }
-
-    void warning(const std::string &fmt, const SourceLocationWrapper &loc_wrapper, py::args args) {
-        log(Level::WARN, fmt, loc_wrapper.toSourceLocation(), args);
-    }
-
-    void error(const std::string &fmt, const SourceLocationWrapper &loc_wrapper, py::args args) {
-        log(Level::ERROR, fmt, loc_wrapper.toSourceLocation(), args);
-    }
-
-    void debug(const std::string &fmt, const SourceLocationWrapper &loc_wrapper, py::args args) {
-        log(Level::DEBUG, fmt, loc_wrapper.toSourceLocation(), args);
-    }
-
-private:
-    void log(Level level, const std::string &fmt, SourceLocation loc, py::args args) {
-        auto *logger = UC::Logger::Make();
+std::string format(std::string fmt, py::args args) {
+    std::string msg = fmt;
+    // If no args provided, return the string as-is (already formatted, e.g., from f-strings)
+    if (args.size() > 1) {
         py::object formatted = py::str(fmt).format(*args);
-        std::string msg = formatted.cast<std::string>();
-        logger->Log(std::move(level), std::move(loc), std::move(msg));
+        msg = formatted.cast<std::string>();
     }
-};
+    return msg;
+}
 
 PYBIND11_MODULE(spdlog_logger, m) {
-    py::class_<PyLogger>(m, "Logger")
-        .def(py::init<>())
-        .def("info", &PyLogger::info, py::arg("fmt"), py::arg("loc"))
-        .def("warning", &PyLogger::warning, py::arg("fmt"), py::arg("loc"))
-        .def("error", &PyLogger::error, py::arg("fmt"), py::arg("loc"))
-        .def("debug", &PyLogger::debug, py::arg("fmt"), py::arg("loc"));
+    m.def("format", &format);
+    m.def("info", &Info);
+    m.def("warning", &Warn);
+    m.def("error", &Error);
+    m.def("debug", &Debug);
+    m.def("setup", &Setup);
+    m.def("flush", &Flush);
+}
+
 }
