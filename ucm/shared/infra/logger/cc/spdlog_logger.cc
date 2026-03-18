@@ -31,9 +31,11 @@
 #include <spdlog/spdlog.h>
 #include "compress_rotate_file_sink.h"
 #include "logger.h"
-
 namespace UC::Logger {
-
+constexpr uint64_t LIMIT_THRESHOLD_MS = 60000;
+constexpr size_t kHashMixMagic = 0x9e3779b97f4a7c15ULL;
+constexpr size_t kHashShiftLeft = 12;
+constexpr size_t kHashShiftRight = 4;
 static spdlog::level::level_enum SpdLevels[] = {spdlog::level::debug, spdlog::level::info,
                                                 spdlog::level::warn, spdlog::level::err,
                                                 spdlog::level::critical};
@@ -43,6 +45,32 @@ void Logger::Log(Level&& lv, SourceLocation&& loc, std::string&& msg)
     auto level = SpdLevels[fmt::underlying(lv)];
     this->logger_ = this->Make();
     this->logger_->log(spdlog::source_loc{loc.file, loc.line, loc.func}, level, std::move(msg));
+}
+
+inline uint64_t get_current_time_ms()
+{
+    auto now = std::chrono::steady_clock::now();
+    auto ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    return ms.time_since_epoch().count();
+}
+
+bool Logger::FilterCallSite(const char* file, int line, std::string_view ori_fmt)
+{
+    uint64_t now = get_current_time_ms();
+    const std::string_view fv(file ? file : "");
+    std::hash<std::string_view> h;
+    size_t x = h(fv);
+    x ^= static_cast<size_t>(line) + kHashMixMagic + (x << kHashShiftLeft) + (x >> kHashShiftRight);
+    x ^= h(ori_fmt) + kHashMixMagic + (x << kHashShiftLeft) + (x >> kHashShiftRight);
+    const size_t slot_idx = x % HASH_SLOT_NUM;
+    std::atomic<uint64_t>& last_time = hash_slots_[slot_idx].last_time;
+    uint64_t last = last_time.load(std::memory_order_relaxed);
+    if (now - last <= LIMIT_THRESHOLD_MS) { return false; }
+    if (last_time.compare_exchange_strong(last, now, std::memory_order_relaxed,
+                                          std::memory_order_relaxed)) {
+        return true;
+    }
+    return false;
 }
 
 std::shared_ptr<spdlog::logger> Logger::Make()
