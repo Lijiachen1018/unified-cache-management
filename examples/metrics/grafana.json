@@ -21,7 +21,7 @@
       }
     ]
   },
-  "description": "Monitoring vLLM inference and UnifiedCache connector (load/save)",
+  "description": "UnifiedCache connector (top) and vLLM server metrics (section vLLM inference). After import, select your Prometheus datasource. Scroll past connector panels to the vLLM row. The model_name variable must match the served_model_name label on both ucm:* and vllm:* series in Prometheus; if vLLM panels are empty while connector panels work, open Explore and compare label_values on a vllm:* metric vs ucm:*.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -957,6 +957,19 @@
       "type": "timeseries"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 35,
+      "panels": [],
+      "title": "vLLM inference",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -1022,7 +1035,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 40
+        "y": 41
       },
       "id": 23,
       "options": {
@@ -1044,7 +1057,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum by(le) (rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -1060,7 +1073,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum by(le) (rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1077,7 +1090,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.9, sum by(le) (rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1094,7 +1107,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.5, sum by(le) (rate(vllm:e2e_request_latency_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1187,7 +1200,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 40
+        "y": 41
       },
       "id": 24,
       "options": {
@@ -1209,7 +1222,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "rate(vllm:prompt_tokens_total{model_name=\"$model_name\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -1225,7 +1238,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "rate(vllm:generation_tokens_total{model_name=\"$model_name\"}[$__rate_interval])",
           "fullMetaSearch": false,
           "hide": false,
@@ -1306,7 +1319,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 48
+        "y": 49
       },
       "id": 25,
       "options": {
@@ -1328,7 +1341,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum by(le) (rate(vllm:time_per_output_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -1344,7 +1357,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum by(le) (rate(vllm:time_per_output_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1361,7 +1374,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.9, sum by(le) (rate(vllm:time_per_output_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1378,7 +1391,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.5, sum by(le) (rate(vllm:time_per_output_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1472,7 +1485,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 48
+        "y": 49
       },
       "id": 26,
       "options": {
@@ -1494,7 +1507,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "vllm:num_requests_running{model_name=\"$model_name\"}",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -1510,7 +1523,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "vllm:num_requests_waiting{model_name=\"$model_name\"}",
           "fullMetaSearch": false,
           "hide": false,
@@ -1591,7 +1604,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 56
+        "y": 57
       },
       "id": 27,
       "options": {
@@ -1613,7 +1626,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.99, sum by(le) (rate(vllm:time_to_first_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1630,7 +1643,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum by(le) (rate(vllm:time_to_first_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
@@ -1646,7 +1659,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.9, sum by(le) (rate(vllm:time_to_first_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1663,7 +1676,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "histogram_quantile(0.5, sum by(le) (rate(vllm:time_to_first_token_seconds_bucket{model_name=\"$model_name\"}[$__rate_interval])))",
           "fullMetaSearch": false,
           "hide": false,
@@ -1757,7 +1770,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 56
+        "y": 57
       },
       "id": 28,
       "options": {
@@ -1814,7 +1827,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 64
+        "y": 65
       },
       "id": 29,
       "options": {
@@ -1866,7 +1879,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "sum by(le) (increase(vllm:request_prompt_tokens_bucket{model_name=\"$model_name\"}[$__rate_interval]))",
           "format": "heatmap",
           "fullMetaSearch": false,
@@ -1906,7 +1919,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 65
       },
       "id": 30,
       "options": {
@@ -1958,7 +1971,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "sum by(le) (increase(vllm:request_generation_tokens_bucket{model_name=\"$model_name\"}[$__rate_interval]))",
           "format": "heatmap",
           "fullMetaSearch": false,
@@ -2037,7 +2050,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 72
+        "y": 73
       },
       "id": 31,
       "options": {
@@ -2059,7 +2072,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
+          "editorMode": "code",
           "expr": "sum by(finished_reason) (increase(vllm:request_success_total{model_name=\"$model_name\"}[$__rate_interval]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -2138,7 +2151,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 72
+        "y": 73
       },
       "id": 32,
       "options": {
@@ -2238,7 +2251,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 80
+        "y": 81
       },
       "id": 33,
       "options": {
@@ -2351,7 +2364,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 80
+        "y": 81
       },
       "id": 34,
       "options": {
@@ -2396,8 +2409,8 @@
       {
         "current": {
           "selected": false,
-          "text": "prometheus",
-          "value": "edx8memhpd9tsa"
+          "text": "",
+          "value": ""
         },
         "hide": 0,
         "includeAll": false,
@@ -2449,6 +2462,6 @@
   "timezone": "",
   "title": "vLLM - UnifiedCache Connector Monitoring",
   "uid": "b281712d-8bff-41ef-9f3f-71ad43c05e9b",
-  "version": 10,
+  "version": 11,
   "weekStart": ""
 }
